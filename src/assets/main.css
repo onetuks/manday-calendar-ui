@@ -1,0 +1,73 @@
+@import 'tailwindcss';
+
+/* 목업과 같은 디자인 토큰 */
+@theme {
+  --font-sans: 'IBM Plex Sans KR', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+  --color-ink: #17191c;
+  --color-ink-2: #3a3f47;
+  --color-muted: #5b616b;
+  --color-line: #e3e5ea;
+  --color-line-soft: #eef0f3;
+  --color-canvas: #f4f5f7;
+  --color-subtle: #fafafb;
+
+  /* 엑셀의 '노란 칸' = 입력 칸 */
+  --color-field: #fffbea;
+  --color-field-line: #e9d48f;
+  --color-field-head: #fff6d6;
+  --color-field-ink: #6b5300;
+
+  --color-danger: #b42318;
+  --color-danger-50: #fdecea;
+  --color-warn-50: #fff1d6;
+  --color-warn-700: #8a4b00;
+  --color-ok-50: #e7f5ee;
+  --color-ok-700: #1e6b45;
+  --color-info-50: #e8eefb;
+  --color-info-700: #2453c9;
+
+  --color-uat-50: #e7f5ee;
+  --color-uat-700: #1e6b45;
+  --color-tpt-50: #f1ecfb;
+  --color-tpt-700: #5b3fa8;
+
+  --color-sun: #c62828;
+  --color-sat: #1f5fbf;
+}
+
+@layer base {
+  html {
+    @apply bg-canvas text-ink font-sans text-sm antialiased;
+  }
+  button:not(:disabled),
+  [role='button'] {
+    cursor: pointer;
+  }
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-info-700;
+  }
+}
+
+@layer components {
+  /* 입력 칸 공통 */
+  .field {
+    @apply h-[34px] w-full rounded-md border border-field-line bg-field px-2 text-[13px] text-ink;
+  }
+  .field-error {
+    @apply border-[1.5px] border-danger bg-danger-50;
+  }
+  .btn {
+    @apply inline-flex h-11 items-center justify-center gap-1.5 rounded-[10px] border border-[#d5d8de] bg-white px-4 text-sm text-ink hover:bg-subtle;
+  }
+  .btn-primary {
+    @apply border-ink bg-ink font-semibold text-white hover:bg-ink-2;
+  }
+  .card {
+    @apply rounded-xl border border-line bg-white;
+  }
+  .pill {
+    @apply inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold;
+  }
+}
