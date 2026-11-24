@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { Lock, PencilLine } from 'lucide-vue-next'
+import { computed } from 'vue'
+import { Lock, PencilLine, Search, X } from 'lucide-vue-next'
 import { useEffortStore } from '@/stores/effort'
 import TaskTag from '@/components/common/TaskTag.vue'
 
 const person = defineModel<string>('person', { required: true })
 const site = defineModel<string>('site', { required: true })
+/** 검색어 (CSR번호·CSR명) — 부모(CalendarView)와 v-model:keyword 로 연결 */
+const keyword = defineModel<string>('keyword', { required: true })
 
 const store = useEffortStore()
 const personOptions = computed(() => [{ value: 'all', label: '전체' }, ...store.members.map((m) => ({ value: m.id, label: m.name }))])
@@ -14,8 +16,6 @@ const siteOptions = [
   { value: '엔솔', label: '엔솔' },
   { value: '화학', label: '화학' },
 ]
-
-const keyword = ref('');
 
 const tabClass = (on: boolean) =>
   on ? 'border-ink bg-ink font-semibold text-white' : 'border-[#d5d8de] bg-white font-medium text-ink-2 hover:bg-subtle'
@@ -53,10 +53,28 @@ const tabClass = (on: boolean) =>
       </button>
     </div>
 
-    <label class="flex items-center gap-2 text-[13px] text-muted">
-      검색
-      <input v-model="keyword" type="search" placeholder="CSR번호 · CSR명" class="h-10 w-[260px] rounded-lg border border-[#d5d8de] bg-white px-3 text-[13px]" />
-    </label>
+    <div class="h-7 w-px bg-line" />
+    <div role="search" class="relative flex items-center">
+      <Search :size="15" class="pointer-events-none absolute left-2.5 text-muted" aria-hidden="true" />
+      <input
+        v-model="keyword"
+        type="text"
+        placeholder="CSR번호 · CSR명 검색"
+        aria-label="CSR번호 또는 CSR명 검색"
+        class="h-9 w-[260px] rounded-lg border bg-white pr-8 pl-8 text-[13px]"
+        :class="keyword.trim() ? 'border-ink' : 'border-[#d5d8de]'"
+        @keydown.esc="keyword = ''"
+      />
+      <button
+        v-if="keyword"
+        type="button"
+        class="absolute right-1 flex size-7 items-center justify-center rounded-md text-muted hover:bg-subtle hover:text-ink"
+        aria-label="검색어 지우기"
+        @click="keyword = ''"
+      >
+        <X :size="14" aria-hidden="true" />
+      </button>
+    </div>
 
     <div class="ml-auto flex flex-wrap items-center gap-3 text-xs text-ink-2">
       <span class="inline-flex items-center gap-1.5"><TaskTag task="DEV" /></span>
