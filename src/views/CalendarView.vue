@@ -35,6 +35,12 @@ const nearestMonth = computed(() => {
   const months = [...new Set(matchedTasks.value.map((a) => a.date.slice(0, 7)))].sort()
   return months.find((m) => m > store.month) ?? months.filter((m) => m < store.month).pop() ?? null
 })
+/** 모달에서 이전날/다음날로 이동. 다른 달로 넘어가면 캘린더도 그 달로 옮긴다 (작업 목록이 달 기준이라) */
+function navigateDay(date: string) {
+  if (!date.startsWith(store.month)) store.month = date.slice(0, 7)
+  openDate.value = date
+}
+
 const nearestLabel = computed(() => (nearestMonth.value ? dayjs(`${nearestMonth.value}-01`).format('YYYY년 M월') : ''))
 
 const monthLabel = computed(() => store.monthStart.format('YYYY년 M월'))
@@ -81,5 +87,5 @@ const monthLabel = computed(() => store.monthStart.format('YYYY년 M월'))
     칸에는 최대 3건만 보이고, 나머지는 칸을 눌러 상세 모달에서 확인합니다. 같은 CSR·작업이 하루에 여러 건이면 한 줄로 합쳐 ×건수로 표시합니다.
   </p>
 
-  <DayDetailModal :date="openDate" :site="site" :keyword="keyword" @close="openDate = null" />
+  <DayDetailModal :date="openDate" :site="site" :keyword="keyword" @close="openDate = null" @navigate="navigateDay" />
 </template>

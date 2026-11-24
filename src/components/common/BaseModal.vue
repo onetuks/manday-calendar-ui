@@ -41,9 +41,14 @@ const emit = defineEmits<{ close: [] }>()
                   <DialogTitle class="text-lg font-bold">{{ title }}</DialogTitle>
                   <p v-if="subtitle" class="text-[13px] text-muted">{{ subtitle }}</p>
                 </div>
+                <!-- 닫기 버튼 왼쪽에 붙는 추가 버튼 (예: 이전날/다음날) -->
+                <div v-if="$slots.actions" class="ml-auto flex items-center gap-1.5">
+                  <slot name="actions" />
+                </div>
                 <button
                   type="button"
-                  class="ml-auto flex size-11 items-center justify-center rounded-[10px] border border-line hover:bg-subtle"
+                  class="flex size-11 shrink-0 items-center justify-center rounded-[10px] border border-line hover:bg-subtle"
+                  :class="$slots.actions ? '' : 'ml-auto'"
                   aria-label="닫기"
                   @click="emit('close')"
                 >

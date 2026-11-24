@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import dayjs from 'dayjs'
-import { Gauge, Lock, Plus, Trash2 } from 'lucide-vue-next'
+import { ChevronLeft, ChevronRight, Gauge, Lock, Plus, Trash2 } from 'lucide-vue-next'
 import { useEffortStore } from '@/stores/effort'
 import BaseModal from '@/components/common/BaseModal.vue'
 import TaskTag from '@/components/common/TaskTag.vue'
@@ -18,7 +18,8 @@ const props = withDefaults(defineProps<{ date: string | null; site?: string; key
   site: 'all',
   keyword: '',
 })
-const emit = defineEmits<{ close: [] }>()
+/** navigate: 이전날/다음날로 이동할 날짜 (YYYY-MM-DD) */
+const emit = defineEmits<{ close: []; navigate: [date: string] }>()
 
 const store = useEffortStore()
 const hpd = computed(() => store.settings?.hoursPerDay ?? 8)
@@ -171,10 +172,55 @@ function close() {
   addingFor.value = null
   emit('close')
 }
+
+// ── 이전날 / 다음날 ───────────────────────────────────
+const shiftLabel = (n: number) => {
+  if (!props.date) return ''
+  const d = dayjs(props.date).add(n, 'day')
+  return `${d.month() + 1}월 ${d.date()}일 (${WEEKDAYS[d.day()]})`
+}
+
+function go(n: number) {
+  if (!props.date) return
+  addingFor.value = null
+  emit('navigate', dayjs(props.date).add(n, 'day').format('YYYY-MM-DD'))
+}
+
+/** ← / → 키로 이동. 입력칸·선택칸에 포커스가 있을 때는 그 칸의 커서 이동을 방해하지 않도록 무시한다 */
+function onKeydown(e: KeyboardEvent) {
+  if (!props.date || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return
+  if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return
+  const el = e.target as HTMLElement | null
+  if (el && (el.isContentEditable || ['INPUT', 'SELECT', 'TEXTAREA'].includes(el.tagName))) return
+  e.preventDefault()
+  go(e.key === 'ArrowLeft' ? -1 : 1)
+}
+onMounted(() => window.addEventListener('keydown', onKeydown))
+onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
 </script>
 
 <template>
   <BaseModal :open="!!date" :title="title" :subtitle="subtitle" width="max-w-[920px]" @close="close">
+    <template #actions>
+      <button
+        type="button"
+        class="flex size-11 items-center justify-center rounded-[10px] border border-line hover:bg-subtle"
+        :aria-label="`이전날 ${shiftLabel(-1)}`"
+        :title="`이전날 ${shiftLabel(-1)} (←)`"
+        @click="go(-1)"
+      >
+        <ChevronLeft :size="18" aria-hidden="true" />
+      </button>
+      <button
+        type="button"
+        class="flex size-11 items-center justify-center rounded-[10px] border border-line hover:bg-subtle"
+        :aria-label="`다음날 ${shiftLabel(1)}`"
+        :title="`다음날 ${shiftLabel(1)} (→)`"
+        @click="go(1)"
+      >
+        <ChevronRight :size="18" aria-hidden="true" />
+      </button>
+    </template>
     <p v-if="moved" role="status" class="mx-[22px] mt-3 rounded-lg bg-info-50 px-3 py-2 text-[13px] text-info-700">{{ moved }}</p>
     <div class="flex max-h-[62vh] flex-col gap-[18px] overflow-y-auto px-[22px] pt-2 pb-5">
       <section v-for="g in groups" :key="g.member.id" class="flex flex-col gap-2 pt-3">
